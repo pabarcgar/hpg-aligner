@@ -4,15 +4,14 @@
 bam_header_t *create_bam_header_by_genome(genome_t *genome);
 //--------------------------------------------------------------------
   
-#define BWT_STAGE         0 // 1
-#define SEEDING_STAGE     1 // 2
-#define CAL_STAGE         2 // 3
-#define PRE_PAIR_STAGE    3 // 4
-#define SW_STAGE          4 // 5
-#define POST_PAIR_STAGE   5 // 6
-
-#define READER_STAGE      6 // 7
-#define WRITER_STAGE      7 // 8
+#define PRE_CS_STAGE      0 // 1
+#define BWT_STAGE         1 // 2
+#define SEEDING_STAGE     2 // 3
+#define CAL_STAGE         3 // 4
+#define PRE_PAIR_STAGE    4 // 5
+#define SW_STAGE          5 // 6
+#define POST_PAIR_STAGE   6 // 7
+#define POST_CS_STAGE     7 // 8
 
 #define CONSUMER_STAGE   -1
 
@@ -222,6 +221,18 @@ int bam_writer(void *data) {
 // stage functions
 //--------------------------------------------------------------------
 
+int pre_cs_stage(void *data) {
+     batch_t *batch = (batch_t *) data;
+
+     if (batch->writer_input->colorspace) {
+       apply_cs_preprocessing(batch->mapping_batch);
+     }
+     
+     return BWT_STAGE;
+}
+
+//--------------------------------------------------------------------
+
 int bwt_stage(void *data) {
      batch_t *batch = (batch_t *) data;
      apply_bwt(batch->bwt_input, batch->mapping_batch);
@@ -344,7 +355,7 @@ void run_dna_aligner(genome_t *genome, bwt_index_t *bwt_index,
      
      // preparing output BAM file
      batch_writer_input_t writer_input;
-     batch_writer_input_init(output_filename, NULL, NULL, NULL, genome, &writer_input);
+     batch_writer_input_init(output_filename, NULL, NULL, NULL, genome, options->colorspace, &writer_input);
      bam_header_t *bam_header = create_bam_header_by_genome(genome);
      writer_input.bam_file = bam_fopen_mode(output_filename, bam_header, "w");
      bam_fwrite_header(bam_header, writer_input.bam_file);
@@ -389,10 +400,10 @@ void run_dna_aligner(genome_t *genome, bwt_index_t *bwt_index,
      // create and initialize workflow
      workflow_t *wf = workflow_new();
      
-     workflow_stage_function_t stage_functions[] = {bwt_stage, seeding_stage, cal_stage, 
+     workflow_stage_function_t stage_functions[] = {pre_cs_stage, bwt_stage, seeding_stage, cal_stage, 
 						    pre_pair_stage, sw_stage, post_pair_stage};
-     char *stage_labels[] = {"BWT", "SEEDING", "CAL", "PRE PAIR", "SW", "POST PAIR"};
-     workflow_set_stages(6, &stage_functions, stage_labels, wf);
+     char *stage_labels[] = {"PRE_CS_STAGE", "BWT", "SEEDING", "CAL", "PRE PAIR", "SW", "POST PAIR"};
+     workflow_set_stages(7, &stage_functions, stage_labels, wf);
      
      // optional producer and consumer functions
      workflow_set_producer(fastq_reader, "FastQ reader", wf);

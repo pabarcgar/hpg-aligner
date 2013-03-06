@@ -157,7 +157,7 @@ bam_header_t *create_bam_header_by_genome(genome_t *genome) {
 
 void batch_writer_input_init(char* match_filename, char* splice_exact_filename, 
 			     char* splice_extend_filename, 
-			     list_t* list_p, genome_t* genome, 
+			     list_t* list_p, genome_t* genome, int colorspace,
 			     batch_writer_input_t* input_p) {
 
   input_p->match_filename = match_filename;
@@ -166,6 +166,7 @@ void batch_writer_input_init(char* match_filename, char* splice_exact_filename,
   input_p->list_p = list_p;
 
   input_p->genome = genome;
+  input_p->colorspace = colorspace;
 
   // internal
   input_p->bam_file = NULL;

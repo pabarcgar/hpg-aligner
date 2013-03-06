@@ -161,6 +161,17 @@ void pair_mng_free(pair_mng_t *p);
 //=====================================================================================
 //=====================================================================================
 
+typedef struct adapter {
+  char base;
+  char first_color;
+  char first_quality;
+} adapter_t;
+
+void adapter_init(char base, char first_color, char first_quality, adapter_t *adapter);
+
+//=====================================================================================
+//=====================================================================================
+
 #define UNKNWON_ACTION 0
 #define BWT_ACTION     1
 #define SEEDING_ACTION 2
@@ -178,8 +189,11 @@ typedef struct mapping_batch {
   size_t num_to_do;
 
   array_list_t *fq_batch;
+  adapter_t *adapters; // for colorspace use
+
   size_t *targets;
   array_list_t **mapping_lists;
+
   char *status; //TODO: ¿?
   pair_mng_t *pair_mng;
 } mapping_batch_t;

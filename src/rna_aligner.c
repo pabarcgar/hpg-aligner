@@ -203,7 +203,7 @@ void run_rna_aligner(genome_t *genome, bwt_index_t *bwt_index, pair_mng_t *pair_
       batch_writer_input_init( output_filename,  
 			       exact_filename,  
 			       extend_filename,  
-			       &write_list, genome, &input);
+			       &write_list, genome, options->colorspace, &input);
       batch_writer2(&input);
       }
   }

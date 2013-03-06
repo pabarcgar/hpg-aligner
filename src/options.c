@@ -58,6 +58,7 @@ options_t *options_new(void) {
   options->min_seed_size = 0;
   options->seed_size = 0;
   options->flank_length = 0;
+  options->colorspace = 0;
   
   return options;
 }
@@ -257,6 +258,7 @@ void options_display(options_t *options) {
      printf("Num gpu threads %d\n", num_gpu_threads);
      printf("GPU Process: %s\n",  gpu_process == 0 ? "Disable":"Enable");
      printf("Num cpu threads %d\n",  num_cpu_threads);
+     printf("Mode: %s\n",  (options->colorspace ? "Colorspace" : "Nucleotides"));
      printf("Report all hits: %s\n",  report_all == 0 ? "Disable":"Enable");
      printf("Report best hits: %d\n",  report_best);
      printf("Report n hits: %d\n",  report_n_hits);
@@ -343,7 +345,8 @@ void** argtable_options_new(void) {
      argtable[38] = arg_int0(NULL, "min-num-seeds", NULL, "Minimum number of seeds per read");
      argtable[39] = arg_int0(NULL, "max-num-seeds", NULL, "Maximum number of seeds per read");
      argtable[40] = arg_lit0(NULL, "gpu-enable", "Enable GPU Process");
-     argtable[41] = arg_end(20);
+     argtable[41] = arg_lit0(NULL, "colorspace", "Enable colorspace mode");
+     argtable[NUM_OPTIONS] = arg_end(20);
      
      return argtable;
 }
@@ -438,6 +441,7 @@ options_t *read_CLI_options(void **argtable, options_t *options) {
        options->gpu_process = 0; 
     #endif
   }
+  if (((struct arg_int*)argtable[41])->count) { options->colorspace = ((struct arg_int*)argtable[41])->count; }
 
   return options;
 }

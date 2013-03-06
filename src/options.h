@@ -41,7 +41,7 @@
 #define MINIMUM_BATCH_SIZE              10000
 //=====================================================================
 
-#define NUM_OPTIONS			41
+#define NUM_OPTIONS			42
 
 typedef struct options {
   unsigned char bwt_set;
@@ -79,6 +79,7 @@ typedef struct options {
   int gpu_process;
   int log_level;
   int index_ratio;
+  int colorspace;
   double min_score;
   double match;
   double mismatch;
