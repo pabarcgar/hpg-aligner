@@ -21,7 +21,7 @@ void apply_cs_preprocessing(mapping_batch_t *batch) {
   adapter_t *adapter;
   for (int i = 0; i < num_reads; i++) {
     read = array_list_get(i, batch->fq_batch);
-    adapter = &batch->apdapters[i];
+    adapter = &batch->adapters[i];
 
     adapter_init(read->sequence[0], cs2nt(read->sequence[1]), 
 		 read->quality[1], adapter);
