@@ -346,6 +346,7 @@ void run_dna_aligner(genome_t *genome, bwt_index_t *bwt_index,
      fastq_batch_reader_input_init(options->in_filename, options->in_filename2, 
 				   options->pair_mode, options->batch_size, 
 				   NULL, &reader_input);
+
      if (options->pair_mode == SINGLE_END_MODE) {
 	  reader_input.fq_file1 = fastq_fopen(options->in_filename);
      } else {
@@ -367,12 +368,12 @@ void run_dna_aligner(genome_t *genome, bwt_index_t *bwt_index,
      
      region_seeker_input_t region_input;
      region_seeker_input_init(NULL, cal_optarg, bwt_optarg, 
-			      bwt_index, NULL, 0, options->gpu_process, 
+			      bwt_index, NULL, 0, options->gpu_process, 0, 0, 
 			      &region_input);
      
      cal_seeker_input_t cal_input;
      cal_seeker_input_init(NULL, cal_optarg, NULL, 0, 
-			   NULL, NULL, &cal_input);
+			   NULL, NULL, genome, &cal_input);
      
      pair_server_input_t pair_input;
      pair_server_input_init(pair_mng, bwt_optarg->report_best, bwt_optarg->report_n_hits, 
@@ -381,20 +382,19 @@ void run_dna_aligner(genome_t *genome, bwt_index_t *bwt_index,
      sw_server_input_t sw_input;
      sw_server_input_init(NULL, NULL, 0, options->match, options->mismatch, 
 			  options->gap_open, options->gap_extend, options->min_score, 
-			  options->flank_length, genome, 0, 0, 0,  bwt_optarg, &sw_input);
+			  options->flank_length, genome, 0, 0, 0,  bwt_optarg, NULL, &sw_input);
 
-     if (time_on) { 
-	  timing_start(MAIN_INDEX, 0, timing_p);
-     }
-     
-     struct timeval start_time, stop_time;
-     gettimeofday(&start_time, NULL);
+     // timing
+     struct timeval start, end;
+     double time;
+
      //--------------------------------------------------------------------------------------
      // workflow management
      //
      //
      batch_t *batch = batch_new(&bwt_input, &region_input, &cal_input, 
-				&pair_input, &sw_input, &writer_input, NULL);
+				&pair_input, NULL, &sw_input, &writer_input, DNA_MODE, NULL);
+
      wf_input_t *wf_input = wf_input_new(&reader_input, batch);
 
      // create and initialize workflow
@@ -409,7 +409,16 @@ void run_dna_aligner(genome_t *genome, bwt_index_t *bwt_index,
      workflow_set_producer(fastq_reader, "FastQ reader", wf);
      workflow_set_consumer(bam_writer, "BAM writer", wf);
      
+     if (time_on) {
+       start_timer(start);
+     }
+
      workflow_run_with(options->num_cpu_threads, wf_input, wf);
+
+     if (time_on) {
+       stop_timer(start, end, time);
+       printf("Total Time: %4.04f sec\n", time / 1000000);
+     }
      
      // free memory
      workflow_free(wf);
@@ -419,10 +428,6 @@ void run_dna_aligner(genome_t *genome, bwt_index_t *bwt_index,
      //
      // end of workflow management
      //--------------------------------------------------------------------------------------
-     gettimeofday(&stop_time, NULL);
-     printf("\t\t-----------------> Alignment time = %0.4f sec\n", 
-	    (stop_time.tv_sec - start_time.tv_sec) + 
-	    ((stop_time.tv_usec - start_time.tv_usec) / 1000000.0));
 
 
      //closing files
@@ -433,11 +438,6 @@ void run_dna_aligner(genome_t *genome, bwt_index_t *bwt_index,
 	  fastq_fclose(reader_input.fq_file2);
      }
      bam_fclose(writer_input.bam_file);
-
-
-     if (time_on) { 
-	  timing_stop(MAIN_INDEX, 0, timing_p);
-     }
      
      if (statistics_on) {
 	  size_t total_item = 0;

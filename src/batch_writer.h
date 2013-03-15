@@ -14,17 +14,17 @@
 
 #include "bioformats/fastq/fastq_file.h"
 #include "bioformats/fastq/fastq_batch.h"
-#include "bioformats/bam-sam/bam_file.h"
+#include "bioformats/bam/bam_file.h"
 
 #include "buffers.h"
 #include "timing.h"
-#include "sw_server.h"
+
 
 //====================================================================================
 //  structures and prototypes
 //====================================================================================
 
-typedef struct batch_writer_input {
+struct batch_writer_input {
   char* match_filename;
   char* mismatch_filename;
 
@@ -36,7 +36,7 @@ typedef struct batch_writer_input {
 
   int colorspace;
 
-  list_t* list_p;
+  linked_list_t* list_p;
 
   // internal
   bam_file_t *bam_file;
@@ -45,23 +45,18 @@ typedef struct batch_writer_input {
   size_t total_mappings;
   size_t num_mapped_reads;
   size_t limit_print;
-
-} batch_writer_input_t;
+};
 
 //------------------------------------------------------------------------------------
 
 void batch_writer_input_init(char* match_filename, char* splice_exact_filename, 
-			     char* splice_extend_filename, list_t* list_p, 
+			     char* splice_extend_filename, linked_list_t* list_p,
 			     genome_t* genome, int colorspace, batch_writer_input_t* input);
 
 //====================================================================================
 
-void batch_writer(batch_writer_input_t* input_p);
-void batch_writer2(batch_writer_input_t* input_p);
-
 bam_header_t *create_bam_header_by_genome(genome_t *genome);
 
-//void batch_writer_splice(batch_writer_splice_input_t* input_p);
 //------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
 

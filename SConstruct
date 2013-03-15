@@ -12,8 +12,8 @@ vars.Add(PathVariable('CPROPS_LIBRARY_PATH', 'Path to the compiled cprops librar
 vars.Add(PathVariable('SAMTOOLS_INCLUDE_PATH', 'Path to the headers of samtools library', '', PathVariable.PathAccept))
 vars.Add(PathVariable('SAMTOOLS_LIBRARY_PATH', 'Path to the compiled samtools library', '', PathVariable.PathAccept))
 
-vars.Add(PathVariable('EXTRAE_INCLUDE_PATH', 'Path to the headers of extrae library', '', PathVariable.PathAccept))
-vars.Add(PathVariable('EXTRAE_LIBRARY_PATH', 'Path to the compiled extrae library', '', PathVariable.PathAccept))
+#vars.Add(PathVariable('EXTRAE_INCLUDE_PATH', 'Path to the headers of extrae library', '', PathVariable.PathAccept))
+#vars.Add(PathVariable('EXTRAE_LIBRARY_PATH', 'Path to the compiled extrae library', '', PathVariable.PathAccept))
 
 compiler = ARGUMENTS.get('compiler', 'gcc')
 
@@ -40,12 +40,10 @@ env['objects'] = []
 
 
 # Targets
-formats = ['fastq', 'bam-sam']
-aligners = ['bwt', 'sw']
 
 SConscript(['%s/SConscript' % bioinfo_path,
             '%s/SConscript' % commons_path
-            ], exports = ['env', 'debug', 'formats', 'aligners', 'compiler'])
+            ], exports = ['env', 'debug', 'compiler'])
 
 env.Program('hpg-aligner',
              source = [Glob('src/*.c'),
