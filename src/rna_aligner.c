@@ -234,7 +234,7 @@ void run_rna_aligner(genome_t *genome, bwt_index_t *bwt_index, pair_mng_t *pair_
   batch_writer_input_init( output_filename,
 			   exact_filename, 
 			   extend_filename, 
-			   alignments_list, genome, &writer_input);
+			   alignments_list, genome, options->colorspace, &writer_input);
 
   bam_header_t *bam_header = create_bam_header_by_genome(genome);
   writer_input.bam_file = bam_fopen_mode(output_filename, bam_header, "w");

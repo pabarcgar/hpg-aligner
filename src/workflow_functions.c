@@ -279,6 +279,13 @@ void write_unmapped_read(fastq_read_t *fq_read, bam_file_t *bam_file) {
 // stage functions
 //--------------------------------------------------------------------
 
+int pre_cs_stage(void *data) {
+    batch_t *batch = (batch_t *) data;
+
+    // TODO: ¿no necesita 'batch' como segundo parametro?
+    return apply_cs_preprocessing(batch->bwt_input);
+}
+
 int bwt_stage(void *data) {
      batch_t *batch = (batch_t *) data;
 
