@@ -136,7 +136,7 @@ void run_dna_aligner(genome_t *genome, bwt_index_t *bwt_index,
      if (statistics_on) {
 	  size_t total_item = 0;
 	  double max_time = 0, total_throughput = 0;
-	  printf("\nBWT time:\n");
+	  printf("\nBWT times:\n");
 	  for (int i = 0; i < options->num_cpu_threads; i++) {
 	       printf("\tThread %d: %0.4f s (%d batches, %d items) -> %0.2f BWT/s (reads)\n", 
 		      i, bwt_time[i] / 1e6, thr_batches[i], thr_bwt_items[i], 1e6 * thr_bwt_items[i] / bwt_time[i]);
