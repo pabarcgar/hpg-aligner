@@ -17,15 +17,22 @@
 //  Workflow Vars
 //====================================================================================
 
-#define BWT_STAGE               0
-#define SEEDING_STAGE           1
-#define CAL_STAGE               2
-#define PRE_PAIR_STAGE          3
-#define RNA_PREPROCESS_STAGE    3
-#define SW_STAGE                4
-#define POST_PAIR_STAGE         5
+//#define BWT_STAGE               0
+//#define SEEDING_STAGE           1
+//#define CAL_STAGE               2
+//#define PRE_PAIR_STAGE          3
+//#define RNA_PREPROCESS_STAGE    3
+//#define SW_STAGE                4
+//#define POST_PAIR_STAGE         5
+//#define CONSUMER_STAGE         -1
+#define BWT_STAGE               1
+#define SEEDING_STAGE           2
+#define CAL_STAGE               3
+#define PRE_PAIR_STAGE          4
+#define RNA_PREPROCESS_STAGE    4
+#define SW_STAGE                5
+#define POST_PAIR_STAGE         6
 #define CONSUMER_STAGE         -1
-
 //------------------------------------------------------------------------------------
 
 
@@ -323,7 +330,6 @@ unsigned int pack_junction(unsigned int chromosome, unsigned int strand,
 			   char* buffer_p);
 
 
-
 typedef struct bwt_server_input bwt_server_input_t;
 typedef struct region_seeker_input region_seeker_input_t;
 typedef struct cal_seeker_input cal_seeker_input_t;
@@ -331,10 +337,12 @@ typedef struct preprocess_rna_input preprocess_rna_input_t;
 typedef struct pair_server_input pair_server_input_t;
 typedef struct sw_server_input sw_server_input_t;
 typedef struct batch_writer_input batch_writer_input_t;
+typedef struct cs_server_input cs_server_input_t;
 
 
 typedef struct batch {
   int mapping_mode;
+  cs_server_input_t *cs_input;
   bwt_server_input_t *bwt_input;
   region_seeker_input_t *region_input;
   cal_seeker_input_t *cal_input;
@@ -347,7 +355,8 @@ typedef struct batch {
 } batch_t;
 
 
-batch_t *batch_new(bwt_server_input_t *bwt_input,
+batch_t *batch_new(cs_server_input_t *cs_input,
+				   bwt_server_input_t *bwt_input,
                    region_seeker_input_t *region_input,
                    cal_seeker_input_t *cal_input,
                    pair_server_input_t *pair_input,

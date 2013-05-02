@@ -16,7 +16,7 @@
 #include "rna_server.h"
 #include "sw_server.h"
 #include "batch_writer.h"
-#include "workflow_scheduler.h"
+#include "commons/workflow_scheduler.h"
 #include "rna_aligner.h"
 
 #define MAX_READS_RNA 200

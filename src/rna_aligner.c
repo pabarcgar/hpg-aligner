@@ -198,6 +198,9 @@ void run_rna_aligner(genome_t *genome, bwt_index_t *bwt_index, pair_mng_t *pair_
   linked_list_t *alignments_list = linked_list_new(COLLECTION_MODE_SYNCHRONIZED);
   linked_list_set_flag(options->pair_mode, alignments_list);
 
+  cs_server_input_t cs_input;
+  cs_server_input_init(options->colorspace, &cs_input);
+
   bwt_server_input_t bwt_input;
   bwt_server_input_init(NULL,  0,  bwt_optarg, 
 			bwt_index, NULL,  0, 
@@ -246,7 +249,7 @@ void run_rna_aligner(genome_t *genome, bwt_index_t *bwt_index, pair_mng_t *pair_
   // workflow management
   //
   //
-  batch_t *batch = batch_new(&bwt_input, &region_input, &cal_input, 
+  batch_t *batch = batch_new(&cs_input, &bwt_input, &region_input, &cal_input,
 			     &pair_input, &preprocess_rna, &sw_input, &writer_input, RNA_MODE, NULL);
 
   wf_input_t *wf_input = wf_input_new(&reader_input, batch);

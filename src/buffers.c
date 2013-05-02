@@ -10,7 +10,8 @@
 //#define MAXLINE 2048
 
 //===================================================================================
-batch_t *batch_new(bwt_server_input_t *bwt_input,
+batch_t *batch_new(cs_server_input_t *cs_input,
+				   bwt_server_input_t *bwt_input,
                    region_seeker_input_t *region_input,
                    cal_seeker_input_t *cal_input,
                    pair_server_input_t *pair_input,
@@ -21,6 +22,7 @@ batch_t *batch_new(bwt_server_input_t *bwt_input,
                    mapping_batch_t *mapping_batch) {
 
   batch_t *b = (batch_t *) calloc(1, sizeof(batch_t));
+  b->cs_input = cs_input;
   b->bwt_input = bwt_input;
   b->region_input = region_input;
   b->cal_input = cal_input;

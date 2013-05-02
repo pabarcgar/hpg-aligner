@@ -5,37 +5,42 @@
 //------------------------------------------------------------------------------------
 
 char cs2nt(char cs) {
-	// TODO: implementar esto a la de ya!
+	// TODO: implementar esto
+	printf("funcion cs2nt de cs_server.c no implementada");
 }
 
 //------------------------------------------------------------------------------------
+void cs_server_input_init(int colorspace, cs_server_input_t* input_p) {
+  input_p->colorspace = colorspace;
+}
 
-// TODO: ¿parametros de entrada? Parece que no hacen falta
-// ejemplo: int apply_bwt(bwt_server_input_t* input, batch_t *batch) {
-void apply_cs_preprocessing(mapping_batch_t *batch) {
-  
-  int num_reads = array_list_size(batch->fq_batch);
+int apply_cs_preprocessing(cs_server_input_t* input, batch_t *batch) {
+  if (input->colorspace) {
+	  mapping_batch_t *mapping_batch = batch->mapping_batch;
+	  int num_reads = array_list_size(mapping_batch->fq_batch);
 
-  batch->adapters = (adapter_t *) calloc(num_reads, sizeof(adapter_t));
+	  mapping_batch->adapters = (adapter_t *) calloc(num_reads, sizeof(adapter_t));
 
-  printf("pre processing CS...\n");
+	  fastq_read_t *read;
+	  adapter_t *adapter;
+	  for (int i = 0; i < num_reads; i++) {
+			read = array_list_get(i, mapping_batch->fq_batch);
+			adapter = &mapping_batch->adapters[i];
 
-  fastq_read_t *read;
-  adapter_t *adapter;
-  for (int i = 0; i < num_reads; i++) {
-    read = array_list_get(i, batch->fq_batch);
-    adapter = &batch->adapters[i];
-
-    // TODO: ¿guardamos el primer color con 0,1,2,3 o con A,T,C,G?
-    //adapter_init(read->sequence[0], cs2nt(read->sequence[1]),
-	//	 read->quality[1], adapter);
-    adapter_init(read->sequence[0], read->sequence[1],
-		 read->quality[1], adapter);
-    
-    printf("read %i of %i: %s\n", i, num_reads, read->sequence);
+			// save the adapter (adapter + first color and first quality)
+			adapter_init(read->sequence[0], read->sequence[1],
+				 read->quality[1], adapter);
+			// remove the adapter and the first color from the sequence, the first quality value,
+			// and enconde the colors in nucleotide-space
+			read->sequence = read->sequence + 2;
+			read->quality++;
+			read->length = read->length - 2;
+			cs_sequence_to_base_space_encoding(read->sequence);
+	  }
+	  read = array_list_get(2, mapping_batch->fq_batch);
   }
 
-  printf("pre processing CS...done !!\n");
+  return BWT_STAGE;
 }
 
 //------------------------------------------------------------------------------------

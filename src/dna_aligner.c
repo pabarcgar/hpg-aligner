@@ -56,6 +56,9 @@ void run_dna_aligner(genome_t *genome, bwt_index_t *bwt_index,
      bam_fwrite_header(bam_header, writer_input.bam_file);
 
      // preparing workflow stage input
+     cs_server_input_t cs_input;
+     cs_server_input_init(options->colorspace, &cs_input);
+
      bwt_server_input_t bwt_input;
      bwt_server_input_init(NULL, 0, bwt_optarg, bwt_index, 
 			   NULL, 0, NULL, &bwt_input);
@@ -86,7 +89,7 @@ void run_dna_aligner(genome_t *genome, bwt_index_t *bwt_index,
      // workflow management
      //
      //
-     batch_t *batch = batch_new(&bwt_input, &region_input, &cal_input, 
+     batch_t *batch = batch_new(&cs_input, &bwt_input, &region_input, &cal_input,
 				&pair_input, NULL, &sw_input, &writer_input, DNA_MODE, NULL);
 
      wf_input_t *wf_input = wf_input_new(&reader_input, batch);

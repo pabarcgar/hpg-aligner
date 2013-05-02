@@ -50,7 +50,7 @@ void *fastq_reader(void *input) {
 	  mapping_batch_t *mapping_batch = mapping_batch_new(reads, 
 							     batch->pair_input->pair_mng);
 
-	  new_batch = batch_new(batch->bwt_input, batch->region_input, batch->cal_input, 
+	  new_batch = batch_new(batch->cs_input, batch->bwt_input, batch->region_input, batch->cal_input,
 				batch->pair_input, batch->preprocess_rna, batch->sw_input, batch->writer_input, 
 				batch->mapping_mode, mapping_batch);
      }
@@ -282,8 +282,7 @@ void write_unmapped_read(fastq_read_t *fq_read, bam_file_t *bam_file) {
 int pre_cs_stage(void *data) {
     batch_t *batch = (batch_t *) data;
 
-    // TODO: ¿no necesita 'batch' como segundo parametro?
-    return apply_cs_preprocessing(batch->bwt_input);
+    return apply_cs_preprocessing(batch->cs_input, batch);
 }
 
 int bwt_stage(void *data) {
