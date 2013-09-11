@@ -32,6 +32,7 @@
 #define RNA_PREPROCESS_STAGE    4
 #define SW_STAGE                5
 #define POST_PAIR_STAGE         6
+#define POST_CS_STAGE           7
 #define CONSUMER_STAGE         -1
 //------------------------------------------------------------------------------------
 

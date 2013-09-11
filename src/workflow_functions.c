@@ -201,7 +201,7 @@ int bam_writer(void *data) {
      if (batch) batch_free(batch);
      
      basic_statistics_add(num_reads, num_mapped_reads, total_mappings, basic_st);
-     
+
      if (time_on) { stop_timer(start, end, time); timing_add(time, BAM_WRITER, timing); }
 }
 
@@ -343,6 +343,12 @@ int sw_stage(void *data) {
 int post_pair_stage(void *data) {
      batch_t *batch = (batch_t *) data;
      return prepare_alignments(batch->pair_input, batch);
+}
+
+int post_cs_stage(void *data) {
+    batch_t *batch = (batch_t *) data;
+
+    return apply_cs_postprocessing(batch->cs_input, batch);
 }
 
 //--------------------------------------------------------------------

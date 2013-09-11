@@ -98,9 +98,9 @@ void run_dna_aligner(genome_t *genome, bwt_index_t *bwt_index,
      workflow_t *wf = workflow_new();
      
      workflow_stage_function_t stage_functions[] = {pre_cs_stage, bwt_stage, seeding_stage, cal_stage, 
-						    pre_pair_stage, sw_stage, post_pair_stage};
-     char *stage_labels[] = {"PRE_CS_STAGE", "BWT", "SEEDING", "CAL", "PRE PAIR", "SW", "POST PAIR"};
-     workflow_set_stages(7, &stage_functions, stage_labels, wf);
+						    pre_pair_stage, sw_stage, post_pair_stage, post_cs_stage};
+     char *stage_labels[] = {"PRE_CS_STAGE", "BWT", "SEEDING", "CAL", "PRE PAIR", "SW", "POST PAIR", "POST_CS_STAGE"};
+     workflow_set_stages(8, &stage_functions, stage_labels, wf);
      
      // optional producer and consumer functions
      workflow_set_producer(fastq_reader, "FastQ reader", wf);

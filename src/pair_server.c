@@ -951,7 +951,8 @@ int prepare_alignments(pair_server_input_t *input, batch_t *batch) {
   if (input->pair_mng->pair_mode != SINGLE_END_MODE) {
     prepare_paired_alignments(input, batch->mapping_batch);
   }
-  return CONSUMER_STAGE;
+  //return CONSUMER_STAGE;
+  return POST_CS_STAGE;
 
   //printf("pair_server.c: prepare_alignments done (pair mode = %i)\n", input->pair_mng->pair_mode);
   //  printf("pair_server.c: 1: after prepare_single_alignments\n");

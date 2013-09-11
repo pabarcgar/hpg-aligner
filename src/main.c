@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
   LOG_DEBUG_F("Command Mode: %s\n", command);
 
   if (!strcmp(command, "build-index")) {
-       run_index_builder(options->genome_filename, options->bwt_dirname, options->index_ratio);
+       run_index_builder(options->genome_filename, options->bwt_dirname, options->index_ratio, options->colorspace);
        LOG_DEBUG("Done !!\n");
        exit(0);
   }
@@ -102,6 +102,7 @@ int main(int argc, char* argv[]) {
   LOG_DEBUG("Reading bwt index...");
   //if (time_on) { timing_start(INIT_BWT_INDEX, 0, timing_p); }
   bwt_index_t *bwt_index = bwt_index_new(options->bwt_dirname);
+ // bwt_index_t *bwt_index = bwt_index_new(options->bwt_dirname, options->colorspace);
   LOG_DEBUG("Reading bwt index done !!");
   
   //BWT parameters

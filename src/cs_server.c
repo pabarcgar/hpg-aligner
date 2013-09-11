@@ -45,7 +45,7 @@ int apply_cs_preprocessing(cs_server_input_t* input, batch_t *batch) {
 
 //------------------------------------------------------------------------------------
 
-void apply_cs_postprocessing(mapping_batch_t *batch) {
+int apply_cs_postprocessing(cs_server_input_t* input, batch_t *batch) {
 }
 
 //------------------------------------------------------------------------------------

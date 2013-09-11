@@ -54,6 +54,8 @@ int sw_stage(void *data);
 
 int post_pair_stage(void *data);
 
+int post_cs_stage(void *data);
+
 //---------------------------------------------------------------------
 //workflow input
 //--------------------------------------------------------------------- 
