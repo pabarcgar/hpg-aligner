@@ -101,8 +101,8 @@ int main(int argc, char* argv[]) {
   // BWT parameters
   LOG_DEBUG("Reading bwt index...");
   //if (time_on) { timing_start(INIT_BWT_INDEX, 0, timing_p); }
-  bwt_index_t *bwt_index = bwt_index_new(options->bwt_dirname);
- // bwt_index_t *bwt_index = bwt_index_new(options->bwt_dirname, options->colorspace);
+  //bwt_index_t *bwt_index = bwt_index_new(options->bwt_dirname);
+  bwt_index_t *bwt_index = bwt_index_new(options->bwt_dirname, options->colorspace);
   LOG_DEBUG("Reading bwt index done !!");
   
   //BWT parameters
