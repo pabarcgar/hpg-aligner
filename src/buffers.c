@@ -121,12 +121,35 @@ void write_batch_free(write_batch_t* write_batch_p) {
 
 //====================================================================================
 
-pair_mng_t *pair_mng_new(int pair_mode, size_t min_distance, size_t max_distance) {
+report_optarg_t *report_optarg_new(int all, int n_best, int n_hits, int only_paired, int best) {
+  report_optarg_t *p = (report_optarg_t*) calloc(1, sizeof(report_optarg_t));
+
+  p->all = all;
+  p->n_best = n_best;
+  p->n_hits = n_hits;
+  p->only_paired = only_paired;
+  p->best = best;
+
+  return p;
+}
+
+//------------------------------------------------------------------------------------
+
+void report_optarg_free(report_optarg_t *p) {
+  if (p != NULL)
+    free(p);
+}
+
+//====================================================================================
+
+pair_mng_t *pair_mng_new(int pair_mode, size_t min_distance, 
+			 size_t max_distance, int report_only_paired) {
   pair_mng_t *p = (pair_mng_t*) calloc(1, sizeof(pair_mng_t));
 
   p->pair_mode = pair_mode;
   p->min_distance = min_distance;
   p->max_distance = max_distance;
+  p->report_only_paired = report_only_paired;
 
   return p;
 }
@@ -239,9 +262,10 @@ mapping_batch_t *mapping_batch_new(array_list_t *fq_batch, pair_mng_t *pair_mng)
   p->extra_stage_do = 0;
 
   if (!pair_mng) { 
-    p->pair_mng = pair_mng_new(SINGLE_END_MODE, 0, 0); 
+    p->pair_mng = pair_mng_new(SINGLE_END_MODE, 0, 0, 0); 
   } else {
-    p->pair_mng = pair_mng_new(pair_mng->pair_mode, pair_mng->min_distance, pair_mng->max_distance); 
+    p->pair_mng = pair_mng_new(pair_mng->pair_mode, pair_mng->min_distance, 
+			       pair_mng->max_distance, pair_mng->report_only_paired); 
   }
 
   p->num_to_do = 0;
@@ -251,6 +275,9 @@ mapping_batch_t *mapping_batch_new(array_list_t *fq_batch, pair_mng_t *pair_mng)
   p->extra_targets = (size_t *) calloc(num_reads, sizeof(size_t));
   p->extra_stage_id = (unsigned char *) calloc(num_reads, sizeof(unsigned char));
   p->mapping_lists = (array_list_t **) calloc(num_reads, sizeof(array_list_t*));
+
+  //for debug. TODO:delete
+  p->bwt_mappings = (unsigned char *)calloc(num_reads, sizeof(unsigned char));
 
   for (size_t i = 0; i < num_reads; i++) {
     p->mapping_lists[i] = array_list_new(500, 
@@ -274,9 +301,10 @@ mapping_batch_t *mapping_batch_new_by_num(size_t num_reads, pair_mng_t *pair_mng
   p->extra_stage_do = 0;
 
   if (!pair_mng) { 
-    p->pair_mng = pair_mng_new(SINGLE_END_MODE, 0, 0); 
+    p->pair_mng = pair_mng_new(SINGLE_END_MODE, 0, 0, 0); 
   } else {
-    p->pair_mng = pair_mng_new(pair_mng->pair_mode, pair_mng->min_distance, pair_mng->max_distance); 
+    p->pair_mng = pair_mng_new(pair_mng->pair_mode, pair_mng->min_distance, 
+			       pair_mng->max_distance, pair_mng->report_only_paired); 
   }
 
   p->num_to_do = 0;

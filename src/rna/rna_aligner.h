@@ -12,10 +12,14 @@
 
 #include "commons/log.h"
 #include "commons/file_utils.h"
+
+#include "commons/workflow_scheduler.h"
+
+#include "bioformats/fastq/fastq_batch_reader.h"
+
 #include "error.h"
 #include "timing.h"
 #include "buffers.h"
-#include "bioformats/fastq/fastq_batch_reader.h"
 #include "cs_server.h"
 #include "bwt_server.h"
 #include "batch_writer.h"
@@ -26,7 +30,6 @@
 #include "preprocess_rna.h"
 #include "options.h"
 #include "statistics.h"
-#include "commons/workflow_scheduler.h"
 #include "workflow_functions.h"
 
 
@@ -52,6 +55,6 @@ typedef struct buffer_pair_item {
 void run_rna_aligner(genome_t *genome, bwt_index_t *bwt_index, 
 		     pair_mng_t *pair_mng,
 		     bwt_optarg_t *bwt_optarg, cal_optarg_t *cal_optarg, 
-		     options_t *options);
+		     report_optarg_t *report_optarg, options_t *options);
 
 #endif

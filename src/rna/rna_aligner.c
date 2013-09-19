@@ -107,37 +107,44 @@ void thread_function(extra_stage_t *extra_stage_input) {
 */
 void run_rna_aligner(genome_t *genome, bwt_index_t *bwt_index, pair_mng_t *pair_mng,
 		     bwt_optarg_t *bwt_optarg, cal_optarg_t *cal_optarg, 
-		     options_t *options) {
+		     report_optarg_t *report_optarg, options_t *options) {
   int path_length = strlen(options->output_name);
-  int extend_length = 0;
+  int prefix_length = 0;
 
-  if (options->extend_name) {
-    extend_length = strlen(options->extend_name);
+  if (options->prefix_name) {
+    prefix_length = strlen(options->prefix_name);
   }
 
-  char *reads_results = (char *)calloc((60 + extend_length), sizeof(char));
-  char *extend_junctions = (char *)calloc((60 + extend_length), sizeof(char));
-  char *exact_junctions = (char *)calloc((60 + extend_length), sizeof(char));
+  char *reads_results = (char *)calloc((60 + prefix_length), sizeof(char));
+  char *log_results = (char *)calloc((60 + prefix_length), sizeof(char));
+  char *extend_junctions = (char *)calloc((60 + prefix_length), sizeof(char));
+  char *exact_junctions = (char *)calloc((60 + prefix_length), sizeof(char));
 
-  char *output_filename = (char *)calloc((path_length + extend_length + 60), sizeof(char));
-  char *extend_filename = (char *)calloc((path_length + extend_length + 60), sizeof(char));
-  char *exact_filename = (char *)calloc((path_length + extend_length + 60), sizeof(char));
+  char *output_filename = (char *)calloc((path_length + prefix_length + 60), sizeof(char));
+  char *log_filename = (char *)calloc((path_length + prefix_length + 60), sizeof(char));
+  char *extend_filename = (char *)calloc((path_length + prefix_length + 60), sizeof(char));
+  char *exact_filename = (char *)calloc((path_length + prefix_length + 60), sizeof(char));
 
-  if (options->extend_name) {
+  if (options->prefix_name) {
     strcat(reads_results, "/");
-    strcat(reads_results, options->extend_name);
+    strcat(reads_results, options->prefix_name);
     strcat(reads_results, "_alignments.bam");  
 
+    strcat(log_results, "/");
+    strcat(log_results, options->prefix_name);
+    strcat(log_results, "_hpg-aligner.log");  
+
     strcat(extend_junctions, "/");
-    strcat(extend_junctions, options->extend_name);
+    strcat(extend_junctions, options->prefix_name);
     strcat(extend_junctions, "_extend_junctions.bed");
 
     strcat(exact_junctions, "/");
-    strcat(exact_junctions, options->extend_name);
+    strcat(exact_junctions, options->prefix_name);
     strcat(exact_junctions, "_exact_junctions.bed");
  
   } else {
     strcat(reads_results, "/alignments.bam");
+    strcat(log_results, "/hpg-aligner.log");
     strcat(extend_junctions, "/extend_junctions.bed");
     strcat(exact_junctions, "/exact_junctions.bed");
   } 
@@ -145,6 +152,10 @@ void run_rna_aligner(genome_t *genome, bwt_index_t *bwt_index, pair_mng_t *pair_
   strcat(output_filename, options->output_name);
   strcat(output_filename, reads_results);
   free(reads_results);
+
+  strcat(log_filename, options->output_name);
+  strcat(log_filename, log_results);
+  free(log_results);
 
   strcat(extend_filename, options->output_name);
   strcat(extend_filename, extend_junctions);
@@ -158,9 +169,6 @@ void run_rna_aligner(genome_t *genome, bwt_index_t *bwt_index, pair_mng_t *pair_
   LOG_DEBUG("Auto Thread Configuration Done !");
 
   // timing
-  struct timeval start, end;
-  double time;
-
   if (time_on) { 
     char* labels_time[NUM_SECTIONS_TIME] = {"FASTQ Reader               ", 
                                             "BWT Server                 ", 
@@ -180,7 +188,7 @@ void run_rna_aligner(genome_t *genome, bwt_index_t *bwt_index, pair_mng_t *pair_
   //============================= INPUT INITIALIZATIONS =========================
   allocate_splice_elements_t chromosome_avls[genome->num_chromosomes];
   init_allocate_splice_elements(chromosome_avls, genome->num_chromosomes);
-  load_intron_file(genome, options->intron_filename, chromosome_avls);
+  //load_intron_file(genome, options->intron_filename, chromosome_avls);
 
 
   fastq_batch_reader_input_t reader_input;
@@ -230,8 +238,7 @@ void run_rna_aligner(genome_t *genome, bwt_index_t *bwt_index, pair_mng_t *pair_
   
 
   pair_server_input_t pair_input;
-  pair_server_input_init(pair_mng, bwt_optarg->report_best, bwt_optarg->report_n_hits, 
-			 bwt_optarg->report_all, NULL, NULL, NULL, &pair_input);
+  pair_server_input_init(pair_mng, report_optarg, NULL, NULL, NULL, &pair_input);
 
   batch_writer_input_t writer_input;
   batch_writer_input_init( output_filename,
@@ -249,6 +256,11 @@ void run_rna_aligner(genome_t *genome, bwt_index_t *bwt_index, pair_mng_t *pair_
   // workflow management
   //
   //
+  // timing
+  struct timeval start, end;
+  extern double main_time;
+
+
   batch_t *batch = batch_new(&cs_input, &bwt_input, &region_input, &cal_input,
 			     &pair_input, &preprocess_rna, &sw_input, &writer_input, RNA_MODE, NULL);
 
@@ -278,9 +290,9 @@ void run_rna_aligner(genome_t *genome, bwt_index_t *bwt_index, pair_mng_t *pair_
   extra_stage_input.workflow = wf;
   //extra_stage_input.pair_mng = pair_mng_new(pair_mng->pair_mode, pair_mng->min_distance, pair_mng->max_distance);
   
-  if (time_on) {
-    start_timer(start);
-  }
+  //  if (time_on) {
+    
+    //}
 
   /*pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
@@ -291,6 +303,7 @@ void run_rna_aligner(genome_t *genome, bwt_index_t *bwt_index, pair_mng_t *pair_
     exit(-1);
   }
   */
+  start_timer(start);
   //Run workflow
   workflow_run_with(options->num_cpu_threads, wf_input, wf);
   //printf("Finish workflow\n");
@@ -301,17 +314,17 @@ void run_rna_aligner(genome_t *genome, bwt_index_t *bwt_index, pair_mng_t *pair_
 			extend_filename, 
 			exact_filename,
 			options->write_size, genome->num_chromosomes);
-
   /*  pthread_attr_destroy(&attr);
   if (ret = pthread_join(thread, &status)) {
     printf("ERROR; return code from pthread_join() is %d\n", ret);
     exit(-1);
   } 
   */
-  if (time_on) { 
+  stop_timer(start, end, main_time);
+  /*if (time_on) { 
     stop_timer(start, end, time);
     timing_add(time, TOTAL_TIME, timing);
-  }
+    }*/
     
   //closing files
   if (options->pair_mode == SINGLE_END_MODE) {

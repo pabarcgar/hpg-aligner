@@ -96,17 +96,13 @@ int bam_writer(void *data) {
      unsigned char found_p2 = 0;
      int i = 0;
 
-     /*     mapping_batch_t *mb_new = mapping_batch_new_by_num(MAX_READS_SP, mapping_batch->pair_mng);     
-     array_list_t *reads_new = array_list_new(MAX_READS_SP, 1.25f, COLLECTION_MODE_ASYNCHRONIZED);
-
-     batch_t *batch_new = batch_new(batch->bwt_input, batch->region_input, batch->cal_input, 
-				    batch->pair_input, batch->preprocess_rna, batch->sw_input, batch->writer_input, 
-				    batch->mapping_mode, mb_new);
-     */
+     extern size_t bwt_correct;
+     extern size_t bwt_error;
+     extern pthread_mutex_t bwt_mutex;
 
      writer_input->total_batches++;
 
-     if (batch->mapping_mode == DNA_MODE) {
+     if (batch->mapping_mode == DNA_MODE || batch->mapping_mode == RNA_MODE) {
        //
        // DNA mode
        //
@@ -114,16 +110,75 @@ int bam_writer(void *data) {
 	 num_items = array_list_size(mapping_batch->mapping_lists[i]);
 	 total_mappings += num_items;
 	 fq_read = (fastq_read_t *) array_list_get(i, mapping_batch->fq_batch);
-	   // mapped or not mapped ?
+
+	 //-----------------------------
+	 //TODO: delete
+	 /*char *token;
+	 char *string;
+	 char *tofree;
+	 int tt = 0;
+	 unsigned char chr;
+	 size_t start, end;
+	 string = strdup(fq_read->id);
+	 
+	 if (string != NULL) {
+	   tofree = string;
+	   while ((token = strsep(&string, "@")) != NULL)
+	     {
+	       tt++;
+	       if (tt == 5) {
+		 if (strcmp(token, "X") == 0) chr = 22;
+		 else if (strcmp(token, "Y") == 0) chr = 23;
+		 else if (strcmp(token, "MT") == 0) chr = 24;
+		 else { chr = atoi(token); chr--;}
+	       }
+	       else if (tt == 6)
+		 start = atof(token);
+	       else if (tt == 7)
+		 end = atof(token);
+	       
+	     }
+	   free(tofree);
+	 }
+	 if (!mapping_batch->bwt_mappings[i]) {
+	   int is_correct = 0;
+	   //Is the read correct mapped?	     
+	   for (int j = 0; j < array_list_size(mapping_batch->mapping_lists[i]); j++) {
+	     alignment_t *alig = array_list_get(j, mapping_batch->mapping_lists[i]);
+	     //printf("%s\n", fq_read->id);
+	     //printf("%i - %i - %i :: Mapping %i - %i\n", chr, start, end, alig->chromosome, alig->position);
+	     if (alig->chromosome == chr && alig->position >= start && alig->position <= end) {
+	       is_correct = 1;
+	       break;
+	     }
+	   }
+
+	   pthread_mutex_lock(&bwt_mutex);
+	   if (is_correct) 	       
+	     bwt_correct++;
+	   else {
+	     bwt_error++;
+	     //printf("%s\n%s\n+\n%s\n", fq_read->id, fq_read->sequence, fq_read->sequence);
+	   }
+	   pthread_mutex_unlock(&bwt_mutex);
+	   //exit(-1);
+	   }*/	   
+	 //------------------------
+	 
+	 // mapped or not mapped ?	 
 	 if (num_items == 0) {
 	   total_mappings++;
 	   write_unmapped_read(fq_read, bam_file);
+	   if (mapping_batch->mapping_lists[i]) {
+	     array_list_free(mapping_batch->mapping_lists[i], NULL);
+	   }
 	 } else {
 	   num_mapped_reads++;
 	   write_mapped_read(mapping_batch->mapping_lists[i], bam_file);
 	 }
        }
-     } else if (batch->mapping_mode == RNA_MODE) {
+     } else {
+       //TODO: This section needs supracals implementatation, that it is not implemented yet.
        //
        // RNA mode
        //
@@ -178,12 +233,12 @@ int bam_writer(void *data) {
 	 } //else num_items
 	 i++;
        } //end of while
-       
+
        if (global_status == WORKFLOW_STATUS_FINISHED) {
 	 pthread_cond_signal(&cond_sp);
        }
      }
-
+     
      if (basic_st->total_reads >= writer_input->limit_print) {
        LOG_DEBUG_F("TOTAL READS PROCESS: %lu\n", basic_st->total_reads);
        LOG_DEBUG_F("\tTotal Reads Mapped: %lu(%.2f%)\n", 
@@ -227,10 +282,10 @@ void write_mapped_read(array_list_t *array_list, bam_file_t *bam_file) {
   size_t num_items = array_list_size(array_list);
   alignment_t *alig;
   bam1_t *bam1;
-
   for (size_t j = 0; j < num_items; j++) {
     alig = (alignment_t *) array_list_get(j, array_list);
     //printf("\t%s\n", alig->cigar);
+    //alignment_print(alig);
     if (alig != NULL) {
       bam1 = convert_to_bam(alig, 33);
       bam_fwrite(bam1, bam_file);
@@ -259,7 +314,12 @@ void write_unmapped_read(fastq_read_t *fq_read, bam_file_t *bam_file) {
   //free(fq_read->id);
   alignment_init_single_end(id, fq_read->sequence, fq_read->quality, 
 			    0, -1, -1, aux, 1, 0, 0, 0, 0, NULL, 0, alig);
-	       
+
+  //  for debugging
+  //  if (strstr(fq_read->id, "rand") == NULL) {
+  //    printf("%s\n%s\n+\n%s\n", fq_read->id, fq_read->sequence, fq_read->quality);
+  //  }
+
   bam1 = convert_to_bam(alig, 33);
   bam_fwrite(bam1, bam_file);
   bam_destroy1(bam1);
@@ -342,6 +402,7 @@ int sw_stage(void *data) {
 
 int post_pair_stage(void *data) {
      batch_t *batch = (batch_t *) data;
+
      return prepare_alignments(batch->pair_input, batch);
 }
 

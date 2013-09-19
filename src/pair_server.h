@@ -13,18 +13,14 @@
 #include "buffers.h"
 #include "timing.h"
 #include "sw_server.h"
-//#include "hashtable.h"
 
 //====================================================================================
 //  structures and prototypes
 //====================================================================================
 
 struct pair_server_input {
-  int report_all;
-  int report_best;
-  int report_n_hits;
-
   pair_mng_t *pair_mng;
+  report_optarg_t *report_optarg;
 
   list_t* pair_list;
   list_t* sw_list;
@@ -33,8 +29,8 @@ struct pair_server_input {
 
 //------------------------------------------------------------------------------------
 
-void pair_server_input_init(pair_mng_t *pair_mng, int report_best, int report_n_hits,
-			    int report_all, list_t* pair_list, list_t *sw_list,
+void pair_server_input_init(pair_mng_t *pair_mng, report_optarg_t *report_optarg,
+			    list_t* pair_list, list_t *sw_list,
 			    list_t *write_list, pair_server_input_t* input);
 
 //====================================================================================

@@ -14,6 +14,7 @@ void bwt_server_input_init(list_t* read_list_p, unsigned int batch_size, bwt_opt
   input_p->write_size = write_size;
   input_p->bwt_index_p = bwt_index_p;
   input_p->unmapped_read_list_p = unmapped_read_list_p;
+
 }
 
 //====================================================================================
@@ -29,7 +30,7 @@ int apply_bwt(bwt_server_input_t* input, batch_t *batch) {
   if (time_on) { start_timer(start); }
 
   mapping_batch_t *mapping_batch = batch->mapping_batch;
-
+  
   bwt_map_inexact_array_list_by_filter(mapping_batch->fq_batch, input->bwt_optarg_p,
 				       input->bwt_index_p, 
 				       mapping_batch->mapping_lists,
@@ -43,16 +44,15 @@ int apply_bwt(bwt_server_input_t* input, batch_t *batch) {
   //printf("APPLY BWT SERVER DONE!\n");
 
   if (batch->mapping_batch->num_targets > 0) {
+    //TODO: DELETE
+    //printf("Web have targets\n");
+    for (int i = 0; i < batch->mapping_batch->num_targets; i++) {
+      batch->mapping_batch->bwt_mappings[batch->mapping_batch->targets[i]] = 1;
+    }
     return SEEDING_STAGE;
-  } else if (batch->pair_input->pair_mng->pair_mode != SINGLE_END_MODE && 
-	     batch->mapping_mode == DNA_MODE) {      
-    return PRE_PAIR_STAGE;
-  } else if (batch->mapping_mode == RNA_MODE && 
-	     batch->pair_input->pair_mng->pair_mode != SINGLE_END_MODE) {
-    return POST_PAIR_STAGE;
-  } 
-  
-  return CONSUMER_STAGE;
+  }
+  //printf("Reads are mapped\n");
+  return POST_PAIR_STAGE;
 }
 
 //------------------------------------------------------------------------------------
