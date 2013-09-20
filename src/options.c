@@ -186,6 +186,7 @@ void options_display(options_t *options) {
      if (options->genome_filename != NULL) {
 	  genome_filename =  strdup(options->genome_filename);
      }
+     unsigned int colorspace = (unsigned int)options->colorspace;
      unsigned int  report_all = (unsigned int)options->report_all;
      unsigned int  report_n_best = (unsigned int)options->report_n_best;
      unsigned int  report_n_hits = (unsigned int)options->report_n_hits;
@@ -234,6 +235,7 @@ void options_display(options_t *options) {
      }
      printf("\tBWT index directory name: %s\n", bwt_dirname);
      printf("\tOutput directory name: %s\n", output_name);
+     printf("\tColorspace mode: %s\n", colorspace == 0 ? "Disable":"Enable");
      printf("\n");
      printf("Architecture parameters\n");
      printf("\tNumber of cpu threads %d\n",  num_cpu_threads);
@@ -447,7 +449,7 @@ options_t *read_CLI_options(void **argtable, options_t *options) {
   if (((struct arg_int*)argtable[42])->count) { options->filter_read_mappings = *(((struct arg_int*)argtable[42])->ival); }
   if (((struct arg_int*)argtable[43])->count) { options->filter_seed_mappings = *(((struct arg_int*)argtable[43])->ival); }
   if (((struct arg_int*)argtable[44])->count) { options->report_best = (((struct arg_int*)argtable[44])->count); }
-  if (((struct arg_int*)argtable[45])->count) { options->colorspace = ((struct arg_int*)argtable[41])->count; }
+  if (((struct arg_int*)argtable[45])->count) { options->colorspace = ((struct arg_int*)argtable[45])->count; }
 
   return options;
 }
